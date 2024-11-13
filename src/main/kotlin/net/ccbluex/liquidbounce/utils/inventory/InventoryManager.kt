@@ -102,15 +102,19 @@ object InventoryManager : Listenable {
             // The schedule is sorted by
             // 1. With Non-inventory open required actions
             // 2. With inventory open required actions
-            // 3. In each of those categories it is sorted by item priority (how important it is)
+            // in each of those categories it is sorted by item priority (how important it is)
             val schedule = event.schedule
                 .filter { actionChain -> actionChain.canPerformAction() && actionChain.actions.isNotEmpty() }
                 .groupBy(InventoryActionChain::requiresInventoryOpen)
                 .map { it.value.sortedByDescending { actionChain -> actionChain.priority } }
-                .reduceOrNull { acc, inventoryActionChains ->
+                .reduce { acc, inventoryActionChains ->
                     acc + inventoryActionChains
-                } ?: break
+                }
+
             // If the schedule is empty, we can break the loop
+            if (schedule.isEmpty()) {
+                break
+            }
 
             // Handle non-inventory open actions first
             for (chained in schedule) {

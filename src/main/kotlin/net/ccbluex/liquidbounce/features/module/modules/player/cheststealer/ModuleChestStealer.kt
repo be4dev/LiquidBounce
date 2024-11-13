@@ -89,19 +89,13 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
 
             val emptySlot = findEmptyStorageSlotsInInventory().firstOrNull() ?: break
             event.schedule(
-                inventoryConstrains,
-                when (itemMoveMode) {
+                inventoryConstrains, when (itemMoveMode) {
                     ItemMoveMode.QUICK_MOVE -> listOf(ClickInventoryAction.performQuickMove(screen, slot))
                     ItemMoveMode.DRAG_AND_DROP -> listOf(
                         ClickInventoryAction.performPickup(screen, slot),
                         ClickInventoryAction.performPickup(screen, emptySlot),
                     )
-                },
-                /**
-                 * we prioritize item based on how important it is
-                 * for example we should prioritize armor over apples
-                 */
-                ItemCategorization(listOf()).getItemFacets(slot).maxOf { it.category.type.allocationPriority }
+                }
             )
         }
 
@@ -180,13 +174,7 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
 
             event.schedule(
                 inventoryConstrains,
-                ClickInventoryAction.performSwap(screen, hotbarSwap.from, hotbarSwap.to),
-                /**
-                 * we prioritize item based on how important it is
-                 * for example we should prioritize armor over apples
-                 */
-                ItemCategorization(listOf()).getItemFacets(hotbarSwap.from)
-                    .maxOf { it.category.type.allocationPriority }
+                ClickInventoryAction.performSwap(screen, hotbarSwap.from, hotbarSwap.to)
             )
 
             // todo: hook to schedule and check if swap was successful
