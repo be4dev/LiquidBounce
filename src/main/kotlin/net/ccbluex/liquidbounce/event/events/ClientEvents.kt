@@ -39,7 +39,7 @@ import net.minecraft.world.GameMode
 
 @Nameable("clickGuiScaleChange")
 @WebSocketEvent
-class ClickGuiScaleChangeEvent(val value: Float): Event()
+class ClickGuiScaleChangeEvent(val value: Float) : Event()
 
 @Nameable("spaceSeperatedNamesChange")
 @WebSocketEvent
@@ -80,7 +80,7 @@ class TargetChangeEvent(val target: PlayerData?) : Event()
 
 @Nameable("blockCountChange")
 @WebSocketEvent
-class BlockCountChangeEvent(val count: Int?): Event()
+class BlockCountChangeEvent(val count: Int?) : Event()
 
 @Nameable("clientChatStateChange")
 @WebSocketEvent
@@ -88,14 +88,19 @@ class ClientChatStateChange(val state: State) : Event() {
     enum class State {
         @SerializedName("connecting")
         CONNECTING,
+
         @SerializedName("connected")
         CONNECTED,
+
         @SerializedName("logon")
         LOGGING_IN,
+
         @SerializedName("loggedIn")
         LOGGED_IN,
+
         @SerializedName("disconnected")
         DISCONNECTED,
+
         @SerializedName("authenticationFailed")
         AUTHENTICATION_FAILED,
     }
@@ -189,12 +194,22 @@ class ScheduleInventoryActionEvent(
     val schedule: MutableList<InventoryActionChain> = mutableListOf()
 ) : Event() {
 
-    fun schedule(constrains: InventoryConstraints, action: InventoryAction) =
-        schedule.add(InventoryActionChain(constrains, arrayOf(action)))
-    fun schedule(constrains: InventoryConstraints, vararg actions: InventoryAction) =
-        this.schedule.add(InventoryActionChain(constrains, actions))
-    fun schedule(constrains: InventoryConstraints, actions: List<InventoryAction>) =
-        this.schedule.add(InventoryActionChain(constrains, actions.toTypedArray()))
+    fun schedule(constrains: InventoryConstraints, action: InventoryAction, priority: Priority = Priority.NORMAL) =
+        schedule.add(InventoryActionChain(constrains, arrayOf(action), priority))
+
+    fun schedule(
+        constrains: InventoryConstraints,
+        vararg actions: InventoryAction,
+        priority: Priority = Priority.NORMAL
+    ) =
+        this.schedule.add(InventoryActionChain(constrains, actions, priority))
+
+    fun schedule(
+        constrains: InventoryConstraints,
+        actions: List<InventoryAction>,
+        priority: Priority = Priority.NORMAL
+    ) =
+        this.schedule.add(InventoryActionChain(constrains, actions.toTypedArray(), priority))
 
 }
 

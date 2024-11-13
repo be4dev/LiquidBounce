@@ -76,17 +76,27 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
 
         for (slot in sortedItemsToCollect) {
             if (!hasInventorySpace() && stillRequiredSpace > 0) {
-                event.schedule(inventoryConstrains, throwItem(cleanupPlan, screen) ?: break)
+                event.schedule(
+                    inventoryConstrains,
+                    throwItem(cleanupPlan, screen) ?: break,
+                    /**
+                     * we prioritize item based on how important it is
+                     * for example we should prioritize armor over apples
+                     */
+                    ItemCategorization(listOf()).getItemFacets(slot).maxOf { it.category.type.allocationPriority }
+                )
             }
 
             val emptySlot = findEmptyStorageSlotsInInventory().firstOrNull() ?: break
-            event.schedule(inventoryConstrains, when (itemMoveMode) {
-                ItemMoveMode.QUICK_MOVE -> listOf(ClickInventoryAction.performQuickMove(screen, slot))
-                ItemMoveMode.DRAG_AND_DROP -> listOf(
-                    ClickInventoryAction.performPickup(screen, slot),
-                    ClickInventoryAction.performPickup(screen, emptySlot),
-                )
-            })
+            event.schedule(
+                inventoryConstrains, when (itemMoveMode) {
+                    ItemMoveMode.QUICK_MOVE -> listOf(ClickInventoryAction.performQuickMove(screen, slot))
+                    ItemMoveMode.DRAG_AND_DROP -> listOf(
+                        ClickInventoryAction.performPickup(screen, slot),
+                        ClickInventoryAction.performPickup(screen, emptySlot),
+                    )
+                }
+            )
         }
 
         // Check if stealing the chest was completed
@@ -133,8 +143,10 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
     private fun isScreenTitleChest(screen: GenericContainerScreen): Boolean {
         val titleString = screen.title.string
 
-        return sequenceOf("container.chest", "container.chestDouble", "container.enderchest", "container.shulkerBox",
-            "container.barrel")
+        return sequenceOf(
+            "container.chest", "container.chestDouble", "container.enderchest", "container.shulkerBox",
+            "container.barrel"
+        )
             .map { Text.translatable(it) }
             .any { it.string == titleString }
     }
@@ -160,8 +172,10 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
                 continue
             }
 
-            event.schedule(inventoryConstrains,
-                ClickInventoryAction.performSwap(screen, hotbarSwap.from, hotbarSwap.to))
+            event.schedule(
+                inventoryConstrains,
+                ClickInventoryAction.performSwap(screen, hotbarSwap.from, hotbarSwap.to)
+            )
 
             // todo: hook to schedule and check if swap was successful
             cleanupPlan.remapSlots(
@@ -210,7 +224,7 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
             }
         }),
         INDEX("Index", { list -> list.sortedBy { it.slotInContainer } }),
-        RANDOM("Random", List<ContainerItemSlot>::shuffled ),
+        RANDOM("Random", List<ContainerItemSlot>::shuffled),
     }
 
     /**
