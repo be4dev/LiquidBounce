@@ -22,12 +22,11 @@ import net.ccbluex.liquidbounce.event.events.ScheduleInventoryActionEvent
 import net.ccbluex.liquidbounce.event.handler
 import net.ccbluex.liquidbounce.features.module.Category
 import net.ccbluex.liquidbounce.features.module.Module
-import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.ArmorItemSlot
-import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.HotbarItemSlot
-import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.ItemSlot
+import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.*
 import net.ccbluex.liquidbounce.utils.inventory.*
 import net.ccbluex.liquidbounce.utils.item.ArmorPiece
 import net.ccbluex.liquidbounce.utils.item.isNothing
+import net.ccbluex.liquidbounce.utils.kotlin.Priority
 import net.minecraft.item.Items
 
 /**
@@ -52,7 +51,11 @@ object ModuleAutoArmor : Module("AutoArmor", Category.COMBAT) {
         }
 
         for (armorPiece in armorToEquip) {
-            event.schedule(inventoryConstraints, equipArmorPiece(armorPiece) ?: continue)
+            event.schedule(
+                inventoryConstraints,
+                equipArmorPiece(armorPiece) ?: continue,
+                Priority.IMPORTANT_FOR_PLAYER_LIFE
+            )
         }
     }
 
