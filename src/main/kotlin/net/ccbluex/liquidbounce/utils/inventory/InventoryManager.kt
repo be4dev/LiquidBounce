@@ -34,6 +34,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.Hotbar
 import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.ItemSlot
 import net.ccbluex.liquidbounce.utils.client.*
 import net.ccbluex.liquidbounce.utils.kotlin.EventPriorityConvention
+import net.ccbluex.liquidbounce.utils.kotlin.Priority
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
 import net.minecraft.client.gui.screen.ingame.InventoryScreen
 import net.minecraft.item.ItemStack
@@ -86,8 +87,10 @@ object InventoryManager : Listenable {
             cycles++
             // Safety check to prevent infinite loops
             if (cycles > 100) {
-                chat("InventoryManager has been running for too long ($cycles cycles) on tick, stopping now. " +
-                    "Please report this issue.")
+                chat(
+                    "InventoryManager has been running for too long ($cycles cycles) on tick, stopping now. " +
+                        "Please report this issue."
+                )
                 break
             }
 
@@ -99,9 +102,14 @@ object InventoryManager : Listenable {
             // The schedule is sorted by
             // 1. With Non-inventory open required actions
             // 2. With inventory open required actions
+            // in each of those categories it is sorted by item priority (how important it is)
             val schedule = event.schedule
                 .filter { actionChain -> actionChain.canPerformAction() && actionChain.actions.isNotEmpty() }
-                .sortedByDescending(InventoryActionChain::requiresInventoryOpen)
+                .groupBy(InventoryActionChain::requiresInventoryOpen)
+                .map { it.value.sortedByDescending { actionChain -> actionChain.priority } }
+                .reduce { acc, inventoryActionChains ->
+                    acc + inventoryActionChains
+                }
 
             // If the schedule is empty, we can break the loop
             if (schedule.isEmpty()) {
@@ -155,7 +163,8 @@ object InventoryManager : Listenable {
                     // the action is a throw action (you cannot miss-click really when throwing)
                     if (index == 0 && action is ClickInventoryAction
                         && constraints.missChance.random() > Random.nextInt(100)
-                        && action.actionType != SlotActionType.THROW) {
+                        && action.actionType != SlotActionType.THROW
+                    ) {
                         // Simulate a miss click (this is only possible for container-type slots)
                         // TODO: Add support for inventory slots
                         if (action.performMissClick()) {
@@ -265,10 +274,12 @@ data class ClickInventoryAction(
 
     companion object {
 
-        fun click(screen: GenericContainerScreen? = null,
-                  slot: ItemSlot,
-                  button: Int,
-                  actionType: SlotActionType) = ClickInventoryAction(
+        fun click(
+            screen: GenericContainerScreen? = null,
+            slot: ItemSlot,
+            button: Int,
+            actionType: SlotActionType
+        ) = ClickInventoryAction(
             screen,
             slot = slot,
             button = button,
@@ -336,7 +347,8 @@ data class ClickInventoryAction(
 
         // Screen is null, which means we are targeting the player inventory
         if (requiresPlayerInventoryOpen() && player.currentScreenHandler.isPlayerInventory &&
-            !interaction.hasRidingInventory()) {
+            !interaction.hasRidingInventory()
+        ) {
             return true
         }
 
@@ -363,8 +375,10 @@ data class ClickInventoryAction(
             .filter { it.itemStack.isEmpty }
             .minByOrNull { slot.distance(it) } ?: return false
 
-        interaction.clickSlot(screen.syncId, closestEmptySlot.getIdForServer(screen), 0,
-            SlotActionType.PICKUP, player)
+        interaction.clickSlot(
+            screen.syncId, closestEmptySlot.getIdForServer(screen), 0,
+            SlotActionType.PICKUP, player
+        )
         return true
     }
 
@@ -423,7 +437,8 @@ data class CreativeInventoryAction(
 
         // Screen is null, which means we are targeting the player inventory
         if (requiresPlayerInventoryOpen() && player.currentScreenHandler.isPlayerInventory &&
-            !interaction.hasRidingInventory()) {
+            !interaction.hasRidingInventory()
+        ) {
             return true
         }
 
@@ -452,7 +467,8 @@ data class CreativeInventoryAction(
  */
 data class InventoryActionChain(
     val inventoryConstraints: InventoryConstraints,
-    val actions: Array<out InventoryAction>
+    val actions: Array<out InventoryAction>,
+    val priority: Priority
 ) {
 
     fun canPerformAction(): Boolean {

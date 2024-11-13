@@ -27,6 +27,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.offhand.ModuleOff
 import net.ccbluex.liquidbounce.utils.inventory.ClickInventoryAction
 import net.ccbluex.liquidbounce.utils.inventory.PlayerInventoryConstraints
 import net.ccbluex.liquidbounce.utils.inventory.findNonEmptySlotsInInventory
+import net.ccbluex.liquidbounce.utils.kotlin.Priority
 import net.minecraft.screen.slot.SlotActionType
 
 /**
@@ -150,7 +151,10 @@ object ModuleInventoryCleaner : Module("InventoryCleaner", Category.PLAYER) {
         val itemsToThrowOut = findItemsToThrowOut(cleanupPlan, findNonEmptySlotsInInventory())
 
         for (slot in itemsToThrowOut) {
-            event.schedule(inventoryConstraints, ClickInventoryAction.performThrow(screen = null, slot))
+            event.schedule(
+                inventoryConstraints, ClickInventoryAction.performThrow(screen = null, slot),
+                Priority.NOT_IMPORTANT
+            )
         }
     }
 
