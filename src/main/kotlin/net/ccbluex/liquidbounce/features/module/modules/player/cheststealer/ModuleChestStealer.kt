@@ -181,7 +181,12 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
 
             event.schedule(
                 inventoryConstrains,
-                ClickInventoryAction.performSwap(screen, hotbarSwap.from, hotbarSwap.to)
+                ClickInventoryAction.performSwap(screen, hotbarSwap.from, hotbarSwap.to),
+                /**
+                 * we prioritize item based on how important it is
+                 * for example we should prioritize armor over apples
+                 */
+                ItemCategorization(listOf()).getItemFacets(hotbarSwap.from).maxOf { it.category.type.allocationPriority }
             )
 
             // todo: hook to schedule and check if swap was successful
