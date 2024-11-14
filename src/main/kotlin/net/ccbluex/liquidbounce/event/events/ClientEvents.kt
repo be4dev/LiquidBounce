@@ -197,23 +197,25 @@ class ScheduleInventoryActionEvent(
     val schedule: MutableList<InventoryActionChain> = mutableListOf()
 ) : Event() {
 
-    fun schedule(constrains: InventoryConstraints, action: InventoryAction, priority: Priority = Priority.NORMAL) =
+    fun schedule(constrains: InventoryConstraints, action: InventoryAction, priority: Priority = Priority.NORMAL) {
         schedule.add(InventoryActionChain(constrains, arrayOf(action), priority))
+    }
 
     fun schedule(
         constrains: InventoryConstraints,
         vararg actions: InventoryAction,
         priority: Priority = Priority.NORMAL
-    ) =
+    ) {
         this.schedule.add(InventoryActionChain(constrains, actions, priority))
+    }
 
     fun schedule(
         constrains: InventoryConstraints,
         actions: List<InventoryAction>,
         priority: Priority = Priority.NORMAL
-    ) =
+    ) {
         this.schedule.add(InventoryActionChain(constrains, actions.toTypedArray(), priority))
-
+    }
 }
 
 @Nameable("browserUrlChange")
