@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with LiquidBounce. If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("NOTHING_TO_INLINE")
 package net.ccbluex.liquidbounce.config
 
 import net.ccbluex.liquidbounce.event.Listenable
@@ -28,6 +27,7 @@ import net.minecraft.client.util.InputUtil
 import net.minecraft.item.Item
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
+import java.util.*
 
 open class Configurable(
     name: String,
@@ -101,8 +101,10 @@ open class Configurable(
         listType: ListValueType = ListValueType.None
     ) = Value(name, default, valueType, listType).apply { this@Configurable.inner.add(this) }
 
-    private fun <T : Any> rangedValue(name: String, default: T, range: ClosedRange<*>, suffix: String,
-                                      valueType: ValueType) =
+    private fun <T : Any> rangedValue(
+        name: String, default: T, range: ClosedRange<*>, suffix: String,
+        valueType: ValueType
+    ) =
         RangedValue(name, default, range, suffix, valueType).apply { this@Configurable.inner.add(this) }
 
     // Fixed data types
@@ -158,16 +160,16 @@ open class Configurable(
         value(name, default, ValueType.ITEMS, ListValueType.Item)
 
     internal inline fun <reified T> enumChoice(name: String, default: T): ChooseListValue<T>
-        where T : Enum<T>, T: NamedChoice = enumChoice(name, default, enumValues<T>())
+        where T : Enum<T>, T : NamedChoice = enumChoice(name, default, enumValues<T>())
 
     protected fun <T> enumChoice(name: String, default: T, choices: Array<T>): ChooseListValue<T>
-        where T : Enum<T>, T: NamedChoice =
+        where T : Enum<T>, T : NamedChoice =
         ChooseListValue(name, default, choices).apply { this@Configurable.inner.add(this) }
 
-    protected fun <T: Choice> choices(listenable: Listenable, name: String, active: T, choices: Array<T>) =
+    protected fun <T : Choice> choices(listenable: Listenable, name: String, active: T, choices: Array<T>) =
         ChoiceConfigurable<T>(listenable, name, { active }) { choices }.apply { this@Configurable.inner.add(this) }
 
-    protected fun <T: Choice> choices(
+    protected fun <T : Choice> choices(
         listenable: Listenable,
         name: String,
         activeCallback: (ChoiceConfigurable<T>) -> T,
