@@ -30,7 +30,6 @@ import net.ccbluex.liquidbounce.features.module.modules.player.invcleaner.*
 import net.ccbluex.liquidbounce.utils.inventory.*
 import net.ccbluex.liquidbounce.utils.item.*
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
-import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.text.Text
 import kotlin.math.ceil
 
@@ -186,7 +185,8 @@ object ModuleChestStealer : Module("ChestStealer", Category.PLAYER) {
                  * we prioritize item based on how important it is
                  * for example we should prioritize armor over apples
                  */
-                ItemCategorization(listOf()).getItemFacets(hotbarSwap.from).maxOf { it.category.type.allocationPriority }
+                ItemCategorization(listOf()).getItemFacets(hotbarSwap.from)
+                    .maxOf { it.category.type.allocationPriority }
             )
 
             // todo: hook to schedule and check if swap was successful
