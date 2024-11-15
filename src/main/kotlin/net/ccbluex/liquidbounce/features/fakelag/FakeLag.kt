@@ -26,7 +26,6 @@ import net.ccbluex.liquidbounce.event.events.WorldRenderEvent
 import net.ccbluex.liquidbounce.event.handler
 import net.ccbluex.liquidbounce.event.repeatable
 import net.ccbluex.liquidbounce.features.module.modules.combat.ModuleFakeLag
-import net.ccbluex.liquidbounce.features.module.modules.combat.killaura.features.AutoBlock
 import net.ccbluex.liquidbounce.features.module.modules.exploit.ModuleClickTp
 import net.ccbluex.liquidbounce.features.module.modules.exploit.disabler.disablers.DisablerVerusExperimental
 import net.ccbluex.liquidbounce.features.module.modules.movement.ModuleFreeze
@@ -95,9 +94,7 @@ object FakeLag : Listenable {
         @Suppress("ComplexCondition")
         if (ModuleBlink.enabled || ModuleAntiVoid.needsArtificialLag || ModuleFakeLag.shouldLag(packet)
             || NoFallBlink.shouldLag() || ModuleInventoryMove.Blink.shouldLag() || ModuleClickTp.requiresLag
-            || FlyNcpClip.shouldLag || ScaffoldBlinkFeature.shouldBlink || FlyVerusB3869Flat.requiresLag
-            || AutoBlock.shouldBlink
-        ) {
+            || FlyNcpClip.shouldLag || ScaffoldBlinkFeature.shouldBlink || FlyVerusB3869Flat.requiresLag) {
             return LagResult.QUEUE
         }
 
@@ -193,12 +190,8 @@ object FakeLag : Listenable {
 
             if (packet is PlayerMoveC2SPacket && packet.changePosition) {
                 synchronized(positions) {
-                    positions.add(
-                        PositionData(
-                            Vec3d(packet.x, packet.y, packet.z), player.velocity,
-                            System.currentTimeMillis()
-                        )
-                    )
+                    positions.add(PositionData(Vec3d(packet.x, packet.y, packet.z), player.velocity,
+                        System.currentTimeMillis()))
                 }
             }
         }

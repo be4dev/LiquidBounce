@@ -20,7 +20,6 @@
     let username = "";
     let password = "";
     let forwardAuthentication = false;
-    let loading = false;
 
     function validateInput(requiresAuthentication: boolean, host: string, username: string, password: string): boolean {
         let valid = /.+:[0-9]+/.test(host);
@@ -38,9 +37,7 @@
         }
         const [host, port] = hostPort.split(":");
 
-        loading = true;
         await addProxyRest(host, parseInt(port), username, password, forwardAuthentication);
-        loading = false;
         visible = false;
         cleanup();
     }
@@ -62,5 +59,5 @@
         <IconTextInput title="Password" icon="lock" type="password" bind:value={password}/>
     {/if}
     <SwitchSetting title="Forward Authentication" bind:value={forwardAuthentication}/>
-    <ButtonSetting title="Add Proxy" {disabled} on:click={addProxy} listenForEnter={true} {loading}/>
+    <ButtonSetting title="Add Proxy" {disabled} on:click={addProxy} listenForEnter={true}/>
 </Modal>

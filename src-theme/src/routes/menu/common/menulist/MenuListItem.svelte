@@ -1,6 +1,6 @@
 <script lang="ts">
     import {createEventDispatcher} from "svelte";
-    import RippleLoader from "../RippleLoader.svelte";
+    import Loader from "../Loader.svelte";
 
     export let image: string;
     export let imageText: string | null = null;
@@ -19,7 +19,7 @@
     <div class="image">
         {#if !previewImageLoaded}
             <div class="loader">
-                <RippleLoader />
+                <Loader />
             </div>
         {/if}
         <img class="preview" on:load={() => previewImageLoaded = true} src={image} alt="preview">
