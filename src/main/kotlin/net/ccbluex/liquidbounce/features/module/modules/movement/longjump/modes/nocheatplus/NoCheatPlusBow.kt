@@ -47,27 +47,49 @@ internal object NoCheatPlusBow : Choice("NoCheatPlusBow") {
     override val parent: ChoiceConfigurable<*>
         get() = ModuleLongJump.mode
 
-    var arrowBoost = 0f
-    var shotArrows = 0f
+    private var receivedArrows = 0
+    private var shotArrows = 0
 
-    val rotations = tree(RotationsConfigurable(this))
-    val charged by int("Charged", 4, 3..20)
-    val speed by float("Speed", 2.5f, 0f..20f)
-    val arrowsToShoot by int("ArrowsToShoot", 8, 0..20)
-    val fallDistance by float("FallDistanceToJump", 0.42f, 0f..2f)
+    private val rotations = tree(RotationsConfigurable(this))
+    private val bowCharge by int("BowCharge", 4, 3..20)
+    private val arrowsToReceive by int("ArrowsToReceive", 8, 0..20)
+    private val additionalArrowsToShoot by int("AdditionalArrowsToShoot", 8, 0..20)
+    private val workingTime by int("WorkingTime", 20, 0..100)
+    private val boostSpeed by float("BoostSpeed", 2.5f, 0f..20f)
+    private val fallDistance by float("FallDistanceToJump", 0.42f, 0f..2f)
 
-    var stopMovement = false
+    private var stopMovement = false
+    private var timeLeft = 0
 
     val movementInputHandler = handler<MovementInputEvent> {
         if (stopMovement) {
             it.directionalInput = DirectionalInput.NONE
-            stopMovement = false
         }
     }
 
     val tickJumpHandler = repeatable {
-        if (arrowBoost <= arrowsToShoot) {
-            mc.options.useKey.isPressed = true
+        if (timeLeft > 0) {
+            return@repeatable
+        }
+
+        if (receivedArrows >= arrowsToReceive) {
+            mc.options.useKey.isPressed = false
+            if (player.isUsingItem) {
+                interaction.stopUsingItem(player)
+            }
+
+            timeLeft = workingTime
+            shotArrows = 0
+            receivedArrows = 0
+            stopMovement = false
+            waitTicks(5)
+            player.jump()
+            player.strafe(speed = boostSpeed.toDouble())
+            return@repeatable
+        }
+
+
+        if (shotArrows <= arrowsToReceive + additionalArrowsToShoot) {
             RotationManager.aimAt(
                 Rotation(player.yaw, -90f),
                 configurable = rotations,
@@ -79,33 +101,22 @@ internal object NoCheatPlusBow : Choice("NoCheatPlusBow") {
             stopMovement = true
 
             // Shoots arrow
-            if (player.itemUseTime >= charged) {
+            mc.options.useKey.isPressed = true
+            if (player.itemUseTime >= bowCharge) {
                 interaction.stopUsingItem(player)
                 shotArrows++
             }
-        } else {
-            mc.options.useKey.isPressed = false
-            if (player.isUsingItem) {
-                interaction.stopUsingItem(player)
-            }
-
-            shotArrows = 0f
-            waitTicks(5)
-            player.jump()
-            player.strafe(speed = speed.toDouble())
-            waitTicks(5)
-            arrowBoost = 0f
         }
     }
 
-    // what, why two events here?
     val handleMovementInput = handler<MovementInputEvent> {
-        if (arrowBoost <= arrowsToShoot) {
+        if (timeLeft <= 0) {
             return@handler
         }
 
+        timeLeft--
         if (player.fallDistance >= fallDistance) {
-            it.jumping = true
+            player.jump()
             player.fallDistance = 0f
         }
     }
@@ -114,14 +125,14 @@ internal object NoCheatPlusBow : Choice("NoCheatPlusBow") {
         val packet = it.packet
 
         if (packet is EntityVelocityUpdateS2CPacket && packet.entityId == player.id && shotArrows > 0.0) {
-            shotArrows--
-            arrowBoost++
+            receivedArrows++
         }
     }
 
-    override fun disable() {
-        shotArrows = 0.0f
-        arrowBoost = 0.0f
+    override fun enable() {
+        shotArrows = 0
+        receivedArrows = 0
+        stopMovement = false
+        timeLeft = 0
     }
-
 }
