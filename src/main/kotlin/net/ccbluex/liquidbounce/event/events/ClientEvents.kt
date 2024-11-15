@@ -24,7 +24,7 @@ import com.google.gson.annotations.SerializedName
 import net.ccbluex.liquidbounce.config.Value
 import net.ccbluex.liquidbounce.event.Event
 import net.ccbluex.liquidbounce.features.chat.packet.User
-import net.ccbluex.liquidbounce.features.misc.proxy.Proxy
+import net.ccbluex.liquidbounce.features.misc.ProxyManager.Proxy
 import net.ccbluex.liquidbounce.utils.client.Nameable
 import net.ccbluex.liquidbounce.utils.entity.SimulatedPlayer
 import net.ccbluex.liquidbounce.utils.inventory.InventoryAction
