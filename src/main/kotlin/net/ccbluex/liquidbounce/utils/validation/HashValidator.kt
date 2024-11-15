@@ -1,12 +1,15 @@
 package net.ccbluex.liquidbounce.utils.validation
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.config.util.decode
 import net.ccbluex.liquidbounce.utils.client.logger
+import net.ccbluex.liquidbounce.utils.kotlin.virtualThread
 import org.apache.commons.codec.digest.DigestUtils
 import java.io.File
 import java.io.FileInputStream
-import kotlin.concurrent.thread
+import java.io.InputStreamReader
 
 private const val HASH_FILE_NAME = ".hash"
 
@@ -57,7 +60,7 @@ object HashValidator {
 
         logger.warn("Failed to delete ${folderToDelete.absolutePath}. Retrying on exit...")
 
-        Runtime.getRuntime().addShutdownHook(thread(start = false) {
+        Runtime.getRuntime().addShutdownHook(virtualThread(start = false) {
             runCatching {
                 folderToDelete.deleteRecursively()
             }.onFailure {
